@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Smart Bookmark App",
-  description: "Private real-time bookmark manager",
+  title: "VaultMark",
+  description: "Secure Smart Bookmark Vault",
 };
 
 export default function RootLayout({
@@ -12,7 +12,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-100 min-h-screen">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

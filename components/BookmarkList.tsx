@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Bookmark } from "@/types/bookmark";
 
-export default function BookmarkList({ user }: any) {
+export default function BookmarkList({ user, search }: any) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
 
   const fetchBookmarks = async () => {
@@ -19,45 +19,62 @@ export default function BookmarkList({ user }: any) {
 
   useEffect(() => {
     fetchBookmarks();
-
-    const channel = supabase
-      .channel("bookmarks-channel")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "bookmarks" },
-        () => fetchBookmarks()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   const deleteBookmark = async (id: string) => {
     await supabase.from("bookmarks").delete().eq("id", id);
+    fetchBookmarks();
   };
 
+  const filtered = bookmarks.filter((b) =>
+    b.title.toLowerCase().includes(search?.toLowerCase())
+  );
+
+  if (filtered.length === 0) {
+    return (
+      <div className="text-center text-gray-500 mt-10">
+        No bookmarks found.
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-2">
-      {bookmarks.map((bookmark) => (
+    <div className="grid gap-4">
+      {filtered.map((bookmark) => (
         <div
           key={bookmark.id}
-          className="flex justify-between border p-3 rounded bg-white"
+          className="bg-white shadow rounded-lg p-4 flex justify-between items-center hover:shadow-lg transition"
         >
-          <a
-            href={bookmark.url}
-            target="_blank"
-            className="text-blue-600 font-medium"
-          >
-            {bookmark.title}
-          </a>
-          <button
-            onClick={() => deleteBookmark(bookmark.id)}
-            className="text-red-500"
-          >
-            Delete
-          </button>
+          <div>
+            <a
+              href={bookmark.url}
+              target="_blank"
+              className="text-blue-600 font-semibold"
+            >
+              {bookmark.title}
+            </a>
+            <p className="text-xs text-gray-400 mt-1">
+              {bookmark.url}
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() =>
+                navigator.clipboard.writeText(bookmark.url)
+              }
+              className="text-sm bg-gray-200 px-3 py-1 rounded hover:bg-gray-300"
+            >
+              Copy
+            </button>
+
+            <button
+              onClick={() => deleteBookmark(bookmark.id)}
+              className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       ))}
     </div>

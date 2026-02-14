@@ -21,22 +21,22 @@ export default function BookmarkForm({ user }: any) {
   };
 
   return (
-    <div className="mb-6 flex gap-2">
+    <div className="bg-white p-6 rounded-lg shadow flex gap-3">
       <input
-        className="border p-2 flex-1 rounded"
-        placeholder="Title"
+        className="border p-3 flex-1 rounded-lg"
+        placeholder="Bookmark title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
       <input
-        className="border p-2 flex-1 rounded"
-        placeholder="URL"
+        className="border p-3 flex-1 rounded-lg"
+        placeholder="https://example.com"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
       />
       <button
         onClick={addBookmark}
-        className="bg-blue-500 text-white px-4 rounded"
+        className="bg-blue-600 text-white px-6 rounded-lg hover:bg-blue-700 transition"
       >
         Add
       </button>

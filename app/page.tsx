@@ -4,22 +4,20 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import BookmarkForm from "@/components/BookmarkForm";
 import BookmarkList from "@/components/BookmarkList";
-import Navbar from "@/components/Navbar";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setUser(data.session?.user ?? null);
       setLoading(false);
     };
 
-    checkUser();
+    getSession();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
@@ -32,21 +30,36 @@ export default function Home() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
-  }, [loading, user, router]);
-
   if (loading) return <div>Loading...</div>;
 
-  if (!user) return null;
+  if (!user) {
+    window.location.href = "/login";
+    return null;
+  }
 
   return (
-    <div className="p-10 max-w-3xl mx-auto">
-      <Navbar email={user.email || ""} />
+    <div className="space-y-6">
+      {/* Stats */}
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-lg font-semibold">
+          Welcome back 👋
+        </h2>
+        <p className="text-gray-500 text-sm">
+          Manage your bookmarks professionally.
+        </p>
+      </div>
+
+      {/* Search */}
+      <input
+        type="text"
+        placeholder="Search bookmarks..."
+        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
       <BookmarkForm user={user} />
-      <BookmarkList user={user} />
+      <BookmarkList user={user} search={search} />
     </div>
   );
 }
