@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import BookmarkForm from "@/components/BookmarkForm";
 import BookmarkList from "@/components/BookmarkList";
+import Navbar from "@/components/Navbar";
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+
+  const listRef = useRef<any>(null);
 
   useEffect(() => {
     const getSession = async () => {
@@ -38,8 +41,10 @@ export default function Home() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Stats */}
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+
+      <Navbar email={user.email} />
+
       <div className="bg-white p-6 rounded-lg shadow">
         <h2 className="text-lg font-semibold">
           Welcome back 👋
@@ -49,7 +54,6 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Search */}
       <input
         type="text"
         placeholder="Search bookmarks..."
@@ -58,8 +62,19 @@ export default function Home() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <BookmarkForm user={user} />
-      <BookmarkList user={user} search={search} />
+      {/* Pass refresh handler */}
+      <BookmarkForm
+        user={user}
+        onAdded={() => listRef.current?.refresh()}
+      />
+
+      {/* Attach ref */}
+      <BookmarkList
+        ref={listRef}
+        user={user}
+        search={search}
+      />
+
     </div>
   );
 }

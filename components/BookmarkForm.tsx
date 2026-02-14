@@ -3,21 +3,24 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
-export default function BookmarkForm({ user }: any) {
+export default function BookmarkForm({ user, onAdded }: any) {
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
 
   const addBookmark = async () => {
     if (!title || !url) return;
 
-    await supabase.from("bookmarks").insert({
+    const { error } = await supabase.from("bookmarks").insert({
       title,
       url,
       user_id: user.id,
     });
 
-    setTitle("");
-    setUrl("");
+    if (!error) {
+      setTitle("");
+      setUrl("");
+      onAdded?.(); // 🔥 instant refresh same tab
+    }
   };
 
   return (
